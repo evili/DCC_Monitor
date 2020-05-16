@@ -29,7 +29,7 @@ void setup() {
 void loop() {
   Dcc.process();
   now = millis();
-  if((now-last_print) >= IDLE_WAIT) {
+  if ((now - last_print) >= IDLE_WAIT) {
     Serial.print("Num IDLEs: ");
     Serial.println(num_packets);
     last_print = now;
@@ -38,20 +38,28 @@ void loop() {
 
 
 void    notifyDccIdle(void) {
-  num_packets +=1;
+  num_packets += 1;
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 }
 
 void notifyDccMsg( DCC_MSG * Msg ) {
   msg_now = millis();
-  if((msg_now-last_msg) >= IDLE_WAIT) {
+  if ((msg_now - last_msg) >= IDLE_WAIT) {
     last_msg = msg_now;
-    Serial.print("DCC Message: Size=");
-    Serial.print(Msg->Size);
-    Serial.print(", Preamble=");
-    Serial.print(Msg->PreambleBits);
-    Serial.print(", Address=");
-    Serial.println(Msg->Data[0]);
-    Serial.println(Msg->Crc);
+    if (Msg->Data[0] != 255) {
+      Serial.print("\nDCC Message: Size= ");
+      Serial.print(Msg->Size);
+      Serial.print(", Preamble= ");
+      Serial.print(Msg->PreambleBits);
+      Serial.print(", Address= ");
+      Serial.print(Msg->Data[0]);
+      if (Msg->Size >= 2) {
+        Serial.print(", Data= ");
+      }
+      for (int i = 1; i < Msg->Size; i++) {
+        Serial.print(Msg->Data[i]);
+        Serial.print(", ");
+      }
+    }
   }
 }
