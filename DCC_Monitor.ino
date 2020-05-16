@@ -3,7 +3,8 @@
 #define DEBUG_PRINT
 #define DCC_IN_PIN 3
 
-const unsigned long IDLE_WAIT = 1000;
+const unsigned long IDLE_WAIT   = 4000;
+const unsigned long PACKET_WAIT = 1000;
 volatile unsigned long num_packets = 0;
 
 volatile unsigned long last_print = 0;
@@ -30,7 +31,7 @@ void loop() {
   Dcc.process();
   now = millis();
   if ((now - last_print) >= IDLE_WAIT) {
-    Serial.print("Num IDLEs: ");
+    Serial.print("NI: ");
     Serial.println(num_packets);
     last_print = now;
   }
@@ -43,11 +44,11 @@ void    notifyDccIdle(void) {
 }
 
 void notifyDccMsg( DCC_MSG * Msg ) {
-  msg_now = millis();
-  if ((msg_now - last_msg) >= IDLE_WAIT) {
-    last_msg = msg_now;
-    if (Msg->Data[0] != 255) {
-      Serial.print("\nDCC Message: Size= ");
+  if (Msg->Data[0] != 255) {
+    msg_now = millis();
+    if ((msg_now - last_msg) >= PACKET_WAIT) {
+      last_msg = msg_now;
+      Serial.print("DCC Message: Size= ");
       Serial.print(Msg->Size);
       Serial.print(", Preamble= ");
       Serial.print(Msg->PreambleBits);
@@ -60,6 +61,7 @@ void notifyDccMsg( DCC_MSG * Msg ) {
         Serial.print(Msg->Data[i]);
         Serial.print(", ");
       }
+      Serial.println(";");
     }
   }
 }
